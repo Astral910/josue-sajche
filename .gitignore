@@ -1,0 +1,27 @@
+# dependencias
+/node_modules
+
+# Next.js
+/.next
+/out
+
+# producción
+/build
+
+# entorno
+.env*
+!.env.example
+
+# sistema
+.DS_Store
+*.pem
+
+# material privado de referencia
+/Cv/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel

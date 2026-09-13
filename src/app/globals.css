@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #050505;
+  --paper: #f3f0ea;
+  --ash: #a1a1aa;
+  --gold: #e8b86d;
+  --line: rgba(255, 255, 255, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--ink);
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(232, 184, 109, 0.08), transparent 25%),
+    var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+}
+
+.container-wide {
+  width: min(calc(100% - 2rem), 1440px);
+  margin-inline: auto;
+}
+
+.section-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(243, 240, 234, 0.55);
+}
+
+.display {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: -0.055em;
+}
+
+.outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(243, 240, 234, 0.3);
+}
+
+.project-visual {
+  background:
+    linear-gradient(140deg, transparent 30%, rgba(255, 255, 255, 0.07)),
+    radial-gradient(circle at var(--x, 65%) var(--y, 45%), var(--glow), transparent 32%),
+    #0a0a0a;
+}
+
+.project-visual::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transform: skew(-8deg) rotate(-3deg);
+}
+
+.mask-fade {
+  mask-image: linear-gradient(to bottom, black 72%, transparent);
+}
+
+@media (max-width: 767px) {
+  .container-wide {
+    width: min(calc(100% - 1.25rem), 1440px);
+  }
+
+  .outline-text {
+    -webkit-text-stroke-width: 0.6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
