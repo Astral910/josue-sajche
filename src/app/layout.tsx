@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Manrope, Syne } from "next/font/google";
+import { Cormorant_Garamond, IBM_Plex_Mono, Manrope, Syne } from "next/font/google";
 
 import "./globals.css";
 
@@ -22,15 +22,24 @@ const plex = IBM_Plex_Mono({
   display: "swap",
 });
 
+// Serif editorial para las frases-manifiesto, al estilo de un atelier.
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Josue Sajche — Desarrollador de producto",
+  title: "Josue Sajche — Para quienes rechazan lo ordinario",
   description:
-    "Portafolio de Josue Sajche: productos full stack, experiencias móviles e inteligencia artificial desde Guatemala.",
-  metadataBase: new URL("https://josue-sajche.vercel.app"),
+    "Atelier digital de Josue Sajche: productos full stack, experiencias móviles e inteligencia artificial construidos con intención desde Guatemala.",
+  metadataBase: new URL("https://astral910.github.io/josue-sajche"),
   openGraph: {
-    title: "Josue Sajche — Código con propósito",
+    title: "Josue Sajche — Para quienes rechazan lo ordinario",
     description:
-      "Productos full stack, experiencias móviles e IA aplicada desde Guatemala.",
+      "Productos digitales construidos sobre criterio, intención e identidad.",
     type: "website",
   },
 };
@@ -41,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${syne.variable} ${manrope.variable} ${plex.variable}`}
+        className={`${syne.variable} ${manrope.variable} ${plex.variable} ${cormorant.variable}`}
       >
         {children}
       </body>

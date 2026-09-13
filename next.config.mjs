@@ -9,6 +9,12 @@ const nextConfig = {
   trailingSlash: true,
   basePath: isGitHubPages ? "/josue-sajche" : "",
   assetPrefix: isGitHubPages ? "/josue-sajche/" : "",
+  // Prefijo público para assets cargados manualmente (modelos 3D, etc.).
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isGitHubPages ? "/josue-sajche" : "",
+  },
+  // Three.js se transpila para el bundle del cliente.
+  transpilePackages: ["three"],
   images: {
     formats: ["image/avif", "image/webp"],
     unoptimized: true,

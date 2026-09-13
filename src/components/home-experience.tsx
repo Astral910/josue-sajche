@@ -1,189 +1,337 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowDown,
-  ArrowUpRight,
-  CornerDownRight,
-  Mail,
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ArrowDown, ArrowUpRight, Plus } from "lucide-react";
 
-import { MotionShell } from "@/components/motion/motion-shell";
-import { HeroVisual } from "@/components/motion/hero-visual";
+import { MotionShell, scrollToTarget } from "@/components/motion/motion-shell";
 import { Reveal } from "@/components/motion/reveal";
+import { NavOverlay } from "@/components/nav-overlay";
+import { Preloader } from "@/components/preloader";
 import { ProjectVisual } from "@/components/project-visual";
-import { Button } from "@/components/ui/button";
-import {
-  achievements,
-  capabilities,
-  goals,
-  milestones,
-  profile,
-} from "@/data/profile";
+import { achievements, goals, milestones, profile } from "@/data/profile";
 import { projects } from "@/data/projects";
+import { approach, hero, services, stack } from "@/data/site";
+import { asset } from "@/lib/asset";
 
-function Header() {
+// Los canvas de Three.js solo existen en el navegador.
+const Showroom = dynamic(
+  () => import("@/components/three/showroom").then((module) => module.Showroom),
+  { ssr: false },
+);
+const SpotlightCar = dynamic(
+  () => import("@/components/three/spotlight-car").then((module) => module.SpotlightCar),
+  { ssr: false },
+);
+
+const mailto = `mailto:${profile.email}?subject=${encodeURIComponent("Iniciar un proyecto")}`;
+
+function ProjectLink({ label = "Iniciar proyecto", className = "" }: { label?: string; className?: string }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/15 backdrop-blur-lg">
-      <div className="container-wide flex h-16 items-center justify-between">
-        <a href="#inicio" className="display text-lg font-bold tracking-[-0.04em]">
-          JS<span className="text-gold">/</span>
-        </a>
-        <nav
-          className="hidden items-center gap-8 font-mono text-[10px] uppercase tracking-[0.16em] text-white/65 md:flex"
-          aria-label="Navegación principal"
-        >
-          <a className="transition-colors hover:text-white" href="#trabajo">
-            Trabajo
-          </a>
-          <a className="transition-colors hover:text-white" href="#trayectoria">
-            Trayectoria
-          </a>
-          <a className="transition-colors hover:text-white" href="#ahora">
-            Ahora
-          </a>
-        </nav>
-        <Button asChild variant="outline" className="h-9 px-4 text-xs">
-          <a href={`mailto:${profile.email}`}>
-            Hablemos <ArrowUpRight className="size-3.5" />
-          </a>
-        </Button>
-      </div>
-    </header>
+    <a href={mailto} className={`link-line ${className}`}>
+      {label} <ArrowUpRight className="size-3.5" />
+    </a>
   );
 }
 
-function Hero() {
-  return (
-    <section
-      id="inicio"
-      className="relative z-10 flex min-h-[100svh] flex-col justify-end overflow-hidden pb-7 pt-24 md:pb-10"
-    >
-      <div className="container-wide">
-        <div className="mb-8 flex items-end justify-between">
-          <p className="section-label max-w-44 leading-relaxed text-white/70">
-            Desarrollador de producto
-            <br />
-            Guatemala · 2026
-          </p>
-          <p className="hidden max-w-64 text-right text-sm leading-relaxed text-white/65 sm:block">
-            Full stack, móvil e IA aplicada a problemas que merecen una mejor
-            respuesta.
-          </p>
-        </div>
-        <h1 className="display w-full text-[clamp(3.3rem,15vw,13rem)] font-bold uppercase leading-[0.74] text-[#f3f0ea] sm:text-[clamp(4.2rem,13.4vw,13rem)]">
-          Josue
-          <span className="block text-right">Sajche</span>
-        </h1>
-        <div className="mt-8 flex items-end justify-between border-t border-white/20 pt-5">
-          <p className="max-w-lg text-base leading-relaxed text-white/78 md:text-xl">
-            {profile.tagline}
-          </p>
-          <a
-            href="#manifiesto"
-            aria-label="Descubrir el portafolio"
-            className="grid size-11 place-items-center border border-white/25 transition-colors hover:bg-white hover:text-black"
-          >
-            <ArrowDown className="size-4" />
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
+/* ------------------------------------------------------------------------ */
+/* Hero: showroom 3D + titulares                                              */
+/* ------------------------------------------------------------------------ */
 
-function Manifesto() {
+function Hero({ started }: { started: boolean }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef(0);
+
+  // El scroll del hero dispersa la flota y desvanece la escena.
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const section = sectionRef.current;
+    const wrap = canvasWrapRef.current;
+    if (!section || !wrap) return;
+
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      end: "bottom top",
+      scrub: true,
+      onUpdate: (self) => {
+        scrollRef.current = self.progress;
+        wrap.style.opacity = String(1 - Math.max(0, self.progress - 0.45) / 0.55);
+      },
+    });
+
+    return () => trigger.kill();
+  }, []);
+
+  // Titulares que suben con la cortina del preloader.
+  useEffect(() => {
+    if (!started || !sectionRef.current) return;
+    const lines = sectionRef.current.querySelectorAll<HTMLElement>(".hero-line");
+    const animation = gsap.fromTo(
+      lines,
+      { yPercent: 110, opacity: 0 },
+      { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.09, delay: 0.5, ease: "power4.out" },
+    );
+    return () => {
+      animation.kill();
+    };
+  }, [started]);
+
   return (
-    <section
-      id="manifiesto"
-      className="relative z-10 bg-[#f0ece3] py-28 text-ink md:py-44"
-    >
-      <div className="container-wide grid gap-12 md:grid-cols-12">
-        <Reveal className="md:col-span-3">
-          <span className="section-label !text-black/50">01 · Manifiesto</span>
-        </Reveal>
-        <Reveal className="md:col-span-9">
-          <p className="display text-[clamp(2.1rem,5.1vw,5.6rem)] font-medium leading-[0.98]">
-            No me interesa construir tecnología para marcar una casilla.
-            <span className="text-black/35">
-              {" "}
-              Me interesa entender el problema, tensar la idea y hacer que el
-              producto se sienta inevitable.
-            </span>
-          </p>
-          <div className="mt-16 grid gap-7 border-t border-black/20 pt-7 md:grid-cols-2">
-            <p className="text-base leading-relaxed text-black/60">
-              {profile.manifesto}
-            </p>
-            <p className="md:pl-10">
-              <span className="font-mono text-xs uppercase tracking-[0.16em]">
-                Actualmente
-              </span>
-              <span className="mt-3 block text-xl">
-                Pasante en Hyper Reality Company y estudiante de informática en
-                Kinal.
-              </span>
+    <>
+      <div
+        ref={canvasWrapRef}
+        className="fixed inset-0 z-0 h-[100svh] bg-ink"
+        aria-hidden="true"
+      >
+        <Showroom started={started} scrollRef={scrollRef} />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-ink via-ink/70 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[22%] bg-gradient-to-b from-ink/80 to-transparent" />
+      </div>
+
+      <section
+        ref={sectionRef}
+        id="inicio"
+        className="relative z-10 flex min-h-[100svh] flex-col justify-between pb-8 pt-24 md:pt-28"
+      >
+        <div className="container-wide">
+          <div className="overflow-hidden">
+            <p className="hero-line serif mx-auto max-w-2xl text-center text-xl leading-snug text-white/75 md:text-3xl">
+              {hero.statement}
             </p>
           </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
+        </div>
 
-function SelectedWork() {
-  return (
-    <section id="trabajo" className="relative z-10 bg-ink py-28 md:py-40">
-      <div className="container-wide">
-        <Reveal className="mb-20 flex items-end justify-between">
-          <div>
-            <span className="section-label">02 · Trabajo seleccionado</span>
-            <h2 className="display mt-5 text-6xl font-semibold uppercase leading-none md:text-8xl">
-              Cinco pruebas,
-              <span className="outline-text block">una historia.</span>
+        <div className="container-wide">
+          <div className="overflow-hidden">
+            <h2 className="hero-line display text-sm font-semibold uppercase tracking-[0.12em] text-white/70 md:text-base">
+              {hero.eyebrow}
+              <span className="block text-white/40">{hero.eyebrowSecond}</span>
             </h2>
           </div>
-          <p className="hidden max-w-64 text-sm leading-relaxed text-white/50 md:block">
-            No son ejercicios agrupados. Son decisiones, colaboración y
-            aprendizajes que dejaron evidencia.
-          </p>
+          <div className="mt-6 overflow-hidden">
+            <h1 className="hero-line display text-[clamp(2.5rem,6.6vw,7.8rem)] font-bold uppercase leading-[0.86] tracking-[-0.05em]">
+              Para quienes
+              <span className="block">rechazan lo ordinario</span>
+            </h1>
+          </div>
+          <div className="mt-8 flex flex-col gap-6 border-t border-white/15 pt-6 md:flex-row md:items-end md:justify-between">
+            <div className="overflow-hidden">
+              <p className="hero-line max-w-xl text-base leading-relaxed text-white/70 md:text-lg">
+                {hero.subtitle}
+              </p>
+            </div>
+            <div className="hero-line flex items-center gap-6">
+              <ProjectLink />
+              <button
+                type="button"
+                onClick={() => scrollToTarget("#atelier")}
+                aria-label="Descubrir el portafolio"
+                className="grid size-11 place-items-center border border-white/25 transition-colors hover:bg-white hover:text-black"
+              >
+                <ArrowDown className="size-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* Atelier: imagen de craft + marquee de tecnologías                          */
+/* ------------------------------------------------------------------------ */
+
+function Atelier() {
+  const imageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const image = imageRef.current;
+    if (!image) return;
+    const animation = gsap.fromTo(
+      image.firstElementChild,
+      { yPercent: -12, scale: 1.15 },
+      {
+        yPercent: 12,
+        scale: 1.15,
+        ease: "none",
+        scrollTrigger: { trigger: image, start: "top bottom", end: "bottom top", scrub: true },
+      },
+    );
+    return () => {
+      animation.scrollTrigger?.kill();
+      animation.kill();
+    };
+  }, []);
+
+  return (
+    <section id="atelier" className="relative z-10 bg-ink pt-24 md:pt-36">
+      <div className="container-wide grid gap-12 md:grid-cols-12 md:gap-8">
+        <Reveal className="md:col-span-5">
+          <div ref={imageRef} className="relative aspect-[4/5] overflow-hidden bg-[#0b0b0b]">
+            <div className="absolute inset-0">
+              <Image
+                src={asset("/josue-hero.png")}
+                alt="Josue Sajche en el taller"
+                fill
+                sizes="(max-width: 768px) 100vw, 40vw"
+                className="object-cover object-[60%_center] grayscale-[0.2]"
+              />
+            </div>
+            <span className="section-label absolute bottom-4 left-4">Detalle · Craft</span>
+          </div>
         </Reveal>
 
-        <div>
-          {projects.map((project, position) => (
-            <Reveal
-              key={project.slug}
-              className="group grid gap-6 border-t border-white/15 py-10 md:grid-cols-12 md:items-center md:py-14"
+        <div className="flex flex-col justify-between md:col-span-6 md:col-start-7">
+          <Reveal>
+            <span className="section-label">Nuestro enfoque en cada build</span>
+            <h2 className="display mt-6 text-[clamp(2.2rem,4.6vw,4.6rem)] font-semibold uppercase leading-[0.92]">
+              Cada decisión es intencional. Cada detalle tiene un propósito.
+            </h2>
+          </Reveal>
+          <Reveal className="mt-12">
+            <p className="max-w-lg text-lg leading-relaxed text-white/60">
+              Basado en tu contexto, tu ritmo y tus estándares. Empecé compitiendo en hackathons y
+              encontré algo más grande que ganar: una forma de construir bajo presión, escuchar
+              problemas reales y convertirlos en producto.
+            </p>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/60">
+              Hoy sigo formándome en Kinal mientras colaboro en sistemas full stack, experiencias
+              móviles y herramientas con IA pensadas desde Guatemala.
+            </p>
+            <ProjectLink className="mt-10 text-gold" />
+          </Reveal>
+        </div>
+      </div>
+
+      {/* Marcas → tecnologías con las que trabajo */}
+      <div className="mt-24 border-y border-white/10 py-6 md:mt-32">
+        <div className="marquee-track" aria-label="Tecnologías">
+          {[...stack, ...stack].map((technology, index) => (
+            <span
+              key={`${technology}-${index}`}
+              className="display flex items-center text-2xl font-medium uppercase text-white/55 md:text-3xl"
             >
-              <div className="md:col-span-1">
-                <span className="font-mono text-xs text-white/40">
-                  {project.index}
-                </span>
-              </div>
-              <div className="md:col-span-5">
-                <p className="section-label mb-4">
-                  {project.kind} · {project.year}
-                </p>
-                <h3 className="display text-4xl font-semibold leading-none transition-transform duration-500 group-hover:translate-x-2 md:text-6xl">
-                  {project.name}
-                </h3>
-                <p className="mt-5 max-w-md text-base leading-relaxed text-white/55">
-                  {project.statement}
-                </p>
-                <Link
-                  href={`/proyectos/${project.slug}`}
-                  className="mt-8 inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-gold"
-                >
-                  Ver caso <CornerDownRight className="size-4" />
-                </Link>
-              </div>
-              <div className="md:col-span-6">
-                <ProjectVisual
-                  name={project.name}
-                  index={`0${position + 1}`}
-                  visual={project.visual}
-                  className="transition-transform duration-700 group-hover:scale-[0.985]"
-                />
+              {technology}
+              <Plus className="mx-8 size-4 text-gold/70" />
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* Enfoque: 3 pasos con auto giratorio                                        */
+/* ------------------------------------------------------------------------ */
+
+function Approach() {
+  const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const list = listRef.current;
+    if (!list) return;
+
+    const steps = list.querySelectorAll<HTMLElement>(".approach-step");
+    const triggers = Array.from(steps).map((step, index) =>
+      ScrollTrigger.create({
+        trigger: step,
+        start: "top 55%",
+        end: "bottom 55%",
+        onEnter: () => setActive(index),
+        onEnterBack: () => setActive(index),
+      }),
+    );
+
+    return () => triggers.forEach((trigger) => trigger.kill());
+  }, []);
+
+  const current = approach[active] ?? approach[0];
+
+  return (
+    <section id="enfoque" className="relative z-10 bg-ink">
+      <div className="container-wide grid md:grid-cols-2">
+        {/* En móvil el auto se ancla abajo; en escritorio ocupa la columna izquierda. */}
+        <div className="sticky bottom-0 z-20 order-2 h-[40svh] md:bottom-auto md:top-0 md:order-1 md:h-screen">
+          <div className="relative h-full w-full bg-gradient-to-t from-ink via-ink via-75% to-ink/0 md:bg-none">
+            <SpotlightCar model={current.model} paint={current.paint} />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between px-1 pb-6">
+              <span className="font-mono text-xs text-white/50">
+                <span className="text-white">{current.index}</span> / 0{approach.length}
+              </span>
+              <span className="section-label">Build · {current.title}</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref={listRef} className="relative z-10 order-1 md:order-2">
+          {approach.map((step) => (
+            <article
+              key={step.index}
+              className="approach-step flex min-h-[60svh] flex-col justify-start border-t border-white/10 pb-24 pt-14 md:min-h-screen md:justify-center md:border-t-0 md:py-16 md:pl-12"
+            >
+              <span className="font-mono text-xs text-white/40">
+                {step.index} / 0{approach.length}
+              </span>
+              <h3 className="display mt-6 text-[clamp(2.6rem,6vw,6rem)] font-semibold uppercase leading-none">
+                {step.title}
+              </h3>
+              <p className="mt-8 max-w-md text-lg leading-relaxed text-white/60">{step.text}</p>
+              <ProjectLink className="mt-10" />
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* Servicios                                                                  */
+/* ------------------------------------------------------------------------ */
+
+function Services() {
+  return (
+    <section className="relative z-10 bg-ink py-28 md:py-40">
+      <div className="container-wide">
+        <Reveal className="grid gap-10 md:grid-cols-12">
+          <h2 className="display text-[clamp(2.2rem,4.8vw,5rem)] font-semibold leading-[0.95] md:col-span-8">
+            Un producto debe decir algo antes del primer clic. Cada línea, material y acabado se
+            considera.
+          </h2>
+          <div className="self-end md:col-span-4">
+            <p className="text-base leading-relaxed text-white/60">
+              Mis servicios se forman con intención: desde la interfaz y la arquitectura hasta la
+              IA aplicada y la entrega. Cada detalle afila el carácter del producto sin
+              sobrecargarlo.
+            </p>
+            <ProjectLink className="mt-8 text-gold" />
+          </div>
+        </Reveal>
+
+        <div className="mt-20 grid border-l border-t border-white/10 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((service, index) => (
+            <Reveal
+              key={service.title}
+              as="article"
+              delay={(index % 3) * 0.06}
+              className="service-card flex min-h-[20rem] flex-col justify-between border-b border-r border-white/10 p-7 md:min-h-[24rem] md:p-9"
+            >
+              <span className="section-label !text-current opacity-60">Servicio</span>
+              <div>
+                <h3 className="display text-3xl font-semibold md:text-4xl">{service.title}</h3>
+                <p className="mt-4 text-base leading-relaxed opacity-70">{service.text}</p>
+                <ProjectLink className="mt-8" />
               </div>
             </Reveal>
           ))}
@@ -193,213 +341,337 @@ function SelectedWork() {
   );
 }
 
-function Journey() {
+/* ------------------------------------------------------------------------ */
+/* "Lo ordinario termina aquí": proyectos destacados                          */
+/* ------------------------------------------------------------------------ */
+
+function OrdinaryEndsHere() {
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const featured = projects.slice(0, 3);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const container = cardsRef.current;
+    if (!container) return;
+
+    const cards = container.querySelectorAll<HTMLElement>(".featured-card");
+    const animations = Array.from(cards).map((card, index) =>
+      gsap.fromTo(
+        card,
+        { yPercent: index === 1 ? 14 : -6 },
+        {
+          yPercent: index === 1 ? -14 : 6,
+          ease: "none",
+          scrollTrigger: { trigger: container, start: "top bottom", end: "bottom top", scrub: true },
+        },
+      ),
+    );
+
+    return () => {
+      animations.forEach((animation) => {
+        animation.scrollTrigger?.kill();
+        animation.kill();
+      });
+    };
+  }, []);
+
   return (
-    <section
-      id="trayectoria"
-      className="relative z-10 overflow-hidden bg-gold py-28 text-ink md:py-40"
-    >
+    <section id="proyectos" className="relative z-10 overflow-hidden bg-ink py-24 md:py-36">
       <div className="container-wide">
-        <Reveal className="grid gap-8 md:grid-cols-12">
-          <div className="md:col-span-4">
-            <span className="section-label !text-black/55">
-              03 · Trayectoria
-            </span>
-            <h2 className="display mt-5 text-6xl font-semibold uppercase leading-[0.85] md:text-8xl">
-              De cero
-              <br />a ahora.
-            </h2>
-          </div>
-          <p className="max-w-lg self-end text-lg leading-relaxed text-black/65 md:col-span-6 md:col-start-7">
-            No es una línea recta. Es una secuencia de retos cada vez más
-            reales: competir, colaborar, operar y aprender a responder por lo
-            construido.
+        <Reveal>
+          <p className="display text-[clamp(3.6rem,13vw,14rem)] font-bold uppercase leading-[0.8]">
+            <span className="serif block text-[0.55em] font-normal normal-case text-white/50">Lo</span>
+            <span className="outline-text">Ordinario</span>
           </p>
         </Reveal>
 
-        <div className="mt-20 border-t border-black/25">
+        <div ref={cardsRef} className="mt-10 grid gap-4 md:grid-cols-3 md:gap-6">
+          {featured.map((project) => (
+            <Link
+              key={project.slug}
+              href={`/proyectos/${project.slug}`}
+              className="featured-card group block"
+            >
+              <ProjectVisual
+                name={project.name}
+                index={project.index}
+                visual={project.visual}
+                className="min-h-[18rem] transition-transform duration-700 group-hover:scale-[0.985] md:min-h-[26rem]"
+              />
+              <div className="mt-4 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="display text-2xl font-semibold">{project.name}</h3>
+                  <p className="section-label mt-1">{project.kind}</p>
+                </div>
+                <ArrowUpRight className="mt-1 size-5 shrink-0 text-white/50 transition-colors group-hover:text-gold" />
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <Reveal className="mt-10 grid gap-8 md:grid-cols-12 md:items-end">
+          <h2 className="display text-[clamp(3.6rem,13vw,14rem)] font-bold uppercase leading-[0.8] md:col-span-8">
+            Termina aquí
+          </h2>
+          <p className="max-w-sm text-lg leading-relaxed text-white/60 md:col-span-4 md:pb-4">
+            Expresiones completas de criterio, intención e individualidad, moldeadas con detalle,
+            contención y presencia.
+          </p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* Builds anteriores + stock disponible                                       */
+/* ------------------------------------------------------------------------ */
+
+function Builds() {
+  return (
+    <section id="builds" className="relative z-10 bg-[#0b0b0b] py-24 md:py-36">
+      <div className="container-wide">
+        <div className="grid gap-6 md:grid-cols-2">
+          <Reveal className="relative flex min-h-[26rem] flex-col justify-end overflow-hidden border border-white/10 p-8 md:min-h-[34rem] md:p-10">
+            <ProjectVisual
+              name="Builds"
+              index="05"
+              visual="steel"
+              className="!absolute inset-0 min-h-0 opacity-70"
+            />
+            <div className="relative">
+              <h2 className="display text-4xl font-semibold uppercase leading-none md:text-6xl">
+                Builds anteriores
+              </h2>
+              <p className="mt-5 max-w-md text-base leading-relaxed text-white/65">
+                Una colección de proyectos anteriores, moldeados por el oficio, el carácter y las
+                personas detrás de cada uno.
+              </p>
+              <button
+                type="button"
+                onClick={() => scrollToTarget("#lista-builds")}
+                className="link-line mt-8 text-gold"
+              >
+                Explorar builds <ArrowDown className="size-3.5" />
+              </button>
+            </div>
+          </Reveal>
+
+          <Reveal
+            delay={0.08}
+            className="relative flex min-h-[26rem] flex-col justify-end overflow-hidden border border-white/10 p-8 md:min-h-[34rem] md:p-10"
+          >
+            <ProjectVisual
+              name="Stock"
+              index="26"
+              visual="amber"
+              className="!absolute inset-0 min-h-0 opacity-70"
+            />
+            <div className="relative">
+              <h2 className="display text-4xl font-semibold uppercase leading-none md:text-6xl">
+                Disponible ahora
+              </h2>
+              <p className="mt-5 max-w-md text-base leading-relaxed text-white/65">
+                Refinado con intención, construido con propósito y listo para el siguiente reto:
+                pasantías, colaboraciones y equipos que quieran ir más lejos.
+              </p>
+              <button
+                type="button"
+                onClick={() => scrollToTarget("#trayectoria")}
+                className="link-line mt-8 text-gold"
+              >
+                Ver trayectoria <ArrowDown className="size-3.5" />
+              </button>
+            </div>
+          </Reveal>
+        </div>
+
+        <div id="lista-builds" className="mt-28 border-t border-white/10">
+          {projects.map((project) => (
+            <Reveal key={project.slug} as="article">
+              <Link
+                href={`/proyectos/${project.slug}`}
+                className="group grid gap-3 border-b border-white/10 py-7 md:grid-cols-12 md:items-center md:py-9"
+              >
+                <span className="font-mono text-xs text-white/40 md:col-span-1">{project.index}</span>
+                <h3 className="display text-3xl font-semibold transition-transform duration-500 group-hover:translate-x-2 md:col-span-4 md:text-5xl">
+                  {project.name}
+                </h3>
+                <p className="section-label md:col-span-3">{project.kind}</p>
+                <p className="hidden text-sm text-white/55 md:col-span-3 md:block">
+                  {project.statement}
+                </p>
+                <span className="flex justify-end md:col-span-1">
+                  <ArrowUpRight className="size-5 text-white/40 transition-colors group-hover:text-gold" />
+                </span>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* Trayectoria, metas y logros                                                */
+/* ------------------------------------------------------------------------ */
+
+function Trajectory() {
+  return (
+    <section id="trayectoria" className="relative z-10 bg-ink py-24 md:py-36">
+      <div className="container-wide">
+        <Reveal className="grid gap-8 md:grid-cols-12">
+          <div className="md:col-span-5">
+            <span className="section-label">Trayectoria</span>
+            <h2 className="display mt-6 text-[clamp(2.6rem,6vw,6rem)] font-semibold uppercase leading-[0.9]">
+              De la primera hackathon al taller.
+            </h2>
+          </div>
+          <p className="max-w-md self-end text-lg leading-relaxed text-white/60 md:col-span-5 md:col-start-8">
+            No es una línea recta. Es una secuencia de retos cada vez más reales: competir,
+            colaborar, operar y aprender a responder por lo construido.
+          </p>
+        </Reveal>
+
+        <div className="mt-16 grid gap-6 lg:grid-cols-3">
           {milestones.map((milestone, index) => (
             <Reveal
               key={milestone.title}
-              className="grid gap-5 border-b border-black/25 py-9 md:grid-cols-12 md:items-start"
-              delay={index * 0.05}
+              as="article"
+              delay={index * 0.06}
+              className="flex min-h-[20rem] flex-col justify-between border border-white/10 p-7 md:p-8"
             >
-              <span className="font-mono text-xs md:col-span-2">
-                {milestone.year}
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/50 md:col-span-2">
-                {milestone.label}
-              </span>
-              <h3 className="display text-3xl font-semibold leading-tight md:col-span-4">
-                {milestone.title}
-              </h3>
-              <p className="max-w-md leading-relaxed text-black/60 md:col-span-4">
-                {milestone.text}
-              </p>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Capabilities() {
-  return (
-    <section className="relative z-10 bg-[#0b0b0b] py-28 md:py-40">
-      <div className="container-wide grid gap-16 md:grid-cols-12">
-        <Reveal className="md:col-span-4">
-          <span className="section-label">04 · Capacidades</span>
-          <h2 className="display mt-5 text-5xl font-semibold uppercase leading-[0.9] md:text-7xl">
-            Pienso en sistemas.
-            <span className="outline-text block">Construyo experiencias.</span>
-          </h2>
-        </Reveal>
-        <div className="md:col-span-7 md:col-start-6">
-          {capabilities.map((capability) => (
-            <Reveal
-              key={capability.number}
-              className="grid gap-4 border-t border-white/15 py-8 sm:grid-cols-[3rem_1fr]"
-            >
-              <span className="font-mono text-xs text-gold">
-                {capability.number}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-gold">{milestone.year}</span>
+                <span className="section-label">{milestone.label}</span>
+              </div>
               <div>
-                <h3 className="display text-3xl font-medium">
-                  {capability.title}
+                <h3 className="display text-2xl font-semibold leading-tight md:text-3xl">
+                  {milestone.title}
                 </h3>
-                <p className="mt-3 max-w-xl leading-relaxed text-white/55">
-                  {capability.text}
-                </p>
-                <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.12em] text-white/35">
-                  {capability.tools}
-                </p>
+                <p className="mt-4 text-base leading-relaxed text-white/60">{milestone.text}</p>
               </div>
             </Reveal>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
 
-function NowAndGoals() {
-  return (
-    <section id="ahora" className="relative z-10 bg-[#f0ece3] py-28 text-ink md:py-40">
-      <div className="container-wide">
-        <Reveal className="grid gap-10 md:grid-cols-12">
-          <div className="md:col-span-3">
-            <span className="section-label !text-black/50">05 · Ahora</span>
-          </div>
-          <div className="md:col-span-9">
-            <h2 className="display max-w-[15ch] text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.88]">
-              Estoy construyendo la distancia entre quien soy y quien quiero
-              llegar a ser.
-            </h2>
-          </div>
-        </Reveal>
-        <div className="mt-20 grid gap-10 border-t border-black/20 pt-8 md:grid-cols-12">
-          <Reveal className="md:col-span-3">
-            <p className="font-mono text-xs uppercase tracking-[0.14em]">
-              La siguiente versión
-            </p>
+        <div className="mt-20 grid gap-12 border-t border-white/10 pt-10 md:grid-cols-12">
+          <Reveal className="md:col-span-6">
+            <span className="section-label">Logros</span>
+            <ul className="mt-6">
+              {achievements.map((achievement) => (
+                <li
+                  key={achievement}
+                  className="display flex items-center gap-4 border-b border-white/10 py-4 text-xl md:text-2xl"
+                >
+                  <span className="size-1.5 shrink-0 bg-gold" aria-hidden="true" />
+                  {achievement}
+                </li>
+              ))}
+            </ul>
           </Reveal>
-          <div className="md:col-span-8 md:col-start-5">
-            {goals.map((goal, index) => (
-              <Reveal
-                key={goal}
-                className="grid grid-cols-[2rem_1fr] gap-4 border-b border-black/15 py-6"
-              >
-                <span className="font-mono text-xs text-black/35">
-                  0{index + 1}
-                </span>
-                <p className="text-xl leading-snug md:text-2xl">{goal}</p>
-              </Reveal>
-            ))}
-          </div>
+          <Reveal className="md:col-span-5 md:col-start-8">
+            <span className="section-label">Hacia dónde voy</span>
+            <ol className="mt-6">
+              {goals.map((goal, index) => (
+                <li
+                  key={goal}
+                  className="grid grid-cols-[2rem_1fr] gap-4 border-b border-white/10 py-4"
+                >
+                  <span className="font-mono text-xs text-white/40">0{index + 1}</span>
+                  <p className="text-lg leading-snug text-white/80">{goal}</p>
+                </li>
+              ))}
+            </ol>
+          </Reveal>
         </div>
       </div>
     </section>
   );
 }
 
-function Achievements() {
-  return (
-    <section className="relative z-10 overflow-hidden border-y border-white/15 bg-ink py-8">
-      <div className="flex w-max animate-[marquee_26s_linear_infinite] items-center">
-        {[...achievements, ...achievements].map((achievement, index) => (
-          <p
-            key={`${achievement}-${index}`}
-            className="display flex items-center text-3xl uppercase text-white/85 md:text-5xl"
-          >
-            {achievement}
-            <span className="mx-8 text-gold">/</span>
-          </p>
-        ))}
-      </div>
-      <style jsx>{`
-        @keyframes marquee {
-          to {
-            transform: translateX(-50%);
-          }
-        }
-      `}</style>
-    </section>
-  );
-}
+/* ------------------------------------------------------------------------ */
+/* CTA final + pie                                                            */
+/* ------------------------------------------------------------------------ */
 
-function Contact() {
+function Closing() {
   return (
-    <footer className="relative z-10 min-h-[90svh] bg-ink pb-8 pt-28 md:pt-40">
-      <div className="container-wide flex min-h-[70svh] flex-col justify-between">
-        <Reveal>
-          <span className="section-label">06 · Contacto</span>
-          <p className="display mt-8 max-w-[13ch] text-[clamp(3.4rem,9vw,9rem)] font-semibold uppercase leading-[0.82]">
-            Hagamos que la idea merezca existir.
-          </p>
-          <Button asChild size="lg" className="mt-12">
-            <a href={`mailto:${profile.email}`}>
-              <Mail className="size-4" /> Escríbeme
-            </a>
-          </Button>
+    <footer id="contacto" className="relative z-10 bg-ink pb-8 pt-28 md:pt-44">
+      <div className="container-wide">
+        <Reveal className="text-center">
+          <p className="serif text-2xl text-white/60 md:text-4xl">¿Estás listo para</p>
+          <h2 className="display mt-4 text-[clamp(3rem,11vw,12rem)] font-bold uppercase leading-[0.82]">
+            Rechazar
+            <span className="block">lo ordinario</span>
+          </h2>
+          <a
+            href={mailto}
+            className="mt-12 inline-flex h-14 items-center gap-3 border border-white/30 px-8 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors hover:bg-white hover:text-black"
+          >
+            Iniciar proyecto <ArrowUpRight className="size-4" />
+          </a>
         </Reveal>
-        <div className="mt-20 grid gap-7 border-t border-white/15 pt-6 text-sm md:grid-cols-3">
-          <p className="text-white/45">
-            {profile.location}
-            <br />
-            Disponible para colaborar
-          </p>
-          <div className="flex gap-5 md:justify-center">
-            <a className="hover:text-gold" href={profile.github} target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-            <a className="hover:text-gold" href={profile.linkedin} target="_blank" rel="noreferrer">
-              LinkedIn
+
+        <div className="mt-28 grid gap-8 border-t border-white/10 pt-6 text-sm md:grid-cols-4 md:items-start">
+          <div>
+            <p className="section-label">Ubicación</p>
+            <p className="mt-2 text-white/70">{profile.location}</p>
+          </div>
+          <div>
+            <p className="section-label">Correo</p>
+            <a href={`mailto:${profile.email}`} className="mt-2 block text-white/70 hover:text-gold">
+              {profile.email}
             </a>
           </div>
-          <p className="md:text-right">© {new Date().getFullYear()} Josue Sajche</p>
+          <div>
+            <p className="section-label">Redes</p>
+            <div className="mt-2 flex gap-5 text-white/70">
+              <a className="hover:text-gold" href={profile.github} target="_blank" rel="noreferrer">
+                GitHub
+              </a>
+              <a className="hover:text-gold" href={profile.linkedin} target="_blank" rel="noreferrer">
+                LinkedIn
+              </a>
+            </div>
+          </div>
+          <div className="md:text-right">
+            <button
+              type="button"
+              onClick={() => scrollToTarget("#")}
+              className="link-line text-white/70 hover:text-white"
+            >
+              Volver arriba
+            </button>
+            <p className="mt-4 text-white/40">© {new Date().getFullYear()} Josue Sajche</p>
+          </div>
         </div>
       </div>
     </footer>
   );
 }
 
+/* ------------------------------------------------------------------------ */
+
 export function HomeExperience() {
+  const [started, setStarted] = useState(false);
+  const handleComplete = useCallback(() => setStarted(true), []);
+
   return (
     <MotionShell>
-      <HeroVisual />
+      <Preloader onComplete={handleComplete} />
       <div className="noise" />
-      <Header />
+      <NavOverlay />
       <main>
-        <Hero />
-        <Manifesto />
-        <SelectedWork />
-        <Journey />
-        <Capabilities />
-        <NowAndGoals />
-        <Achievements />
+        <Hero started={started} />
+        <Atelier />
+        <Approach />
+        <Services />
+        <OrdinaryEndsHere />
+        <Builds />
+        <Trajectory />
       </main>
-      <Contact />
+      <Closing />
     </MotionShell>
   );
 }
