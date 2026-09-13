@@ -25,7 +25,7 @@ export function ProjectStage({ index, label }: ProjectStageProps) {
       <SpotlightLandmark kind={landmark.kind} zoom={0.8} />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between px-5 pb-5 md:px-10">
         <span className="section-label">
-          Build {index} · {landmark.name}
+          Proyecto {index} · {landmark.name}
         </span>
         <span className="section-label">{label}</span>
       </div>

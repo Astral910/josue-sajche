@@ -65,15 +65,15 @@ export function Preloader({ onComplete }: PreloaderProps) {
       aria-label="Cargando portafolio"
     >
       <div className="flex items-start justify-between">
-        <span className="section-label">Josue Sajche · Atelier digital</span>
-        <span className="section-label">Guatemala</span>
+        <span className="section-label">Josue Sajche · Portafolio</span>
+        <span className="section-label">Full stack · IA</span>
       </div>
 
       <div className="overflow-hidden">
         <p className="display flex flex-wrap gap-x-[0.25em] text-[clamp(2.6rem,9vw,8rem)] font-bold uppercase leading-[0.85]">
-          <span className="preloader-word inline-block">Rechaza</span>
-          <span className="preloader-word inline-block text-white/30">lo</span>
-          <span className="preloader-word inline-block">ordinario</span>
+          <span className="preloader-word inline-block">Josue</span>
+          <span className="preloader-word inline-block">Sajche</span>
+          <span className="preloader-word inline-block text-white/30">Full stack</span>
         </p>
       </div>
 
@@ -82,7 +82,7 @@ export function Preloader({ onComplete }: PreloaderProps) {
           <span ref={counterRef} className="font-mono text-sm tabular-nums text-white/70">
             000
           </span>
-          <span className="section-label">Levantando la cordillera</span>
+          <span className="section-label">Cargando escena 3D</span>
         </div>
         <div className="mt-3 h-px w-full bg-white/15">
           <div ref={barRef} className="h-full origin-left scale-x-0 bg-gold" />

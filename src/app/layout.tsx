@@ -22,7 +22,7 @@ const plex = IBM_Plex_Mono({
   display: "swap",
 });
 
-// Serif editorial para las frases-manifiesto, al estilo de un atelier.
+// Serif editorial para las frases destacadas de los casos de estudio.
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -32,14 +32,13 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Josue Sajche — Para quienes rechazan lo ordinario",
+  title: "Josue Sajche — Desarrollador full stack e IA",
   description:
-    "Atelier digital de Josue Sajche: productos full stack, experiencias móviles e inteligencia artificial construidos con intención desde Guatemala.",
+    "Portafolio de Josue Sajche, desarrollador full stack guatemalteco: aplicaciones web, móviles e integraciones con IA para negocios y startups.",
   metadataBase: new URL("https://astral910.github.io/josue-sajche"),
   openGraph: {
-    title: "Josue Sajche — Para quienes rechazan lo ordinario",
-    description:
-      "Productos digitales construidos sobre criterio, intención e identidad.",
+    title: "Josue Sajche — Desarrollador full stack e IA",
+    description: "Aplicaciones web, móviles e integraciones con IA para negocios y startups.",
     type: "website",
   },
 };

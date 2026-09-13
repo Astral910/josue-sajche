@@ -6,7 +6,6 @@ import { Environment, Lightformer, MeshReflectorMaterial } from "@react-three/dr
 import { Group, MathUtils } from "three";
 
 import { Embers } from "@/components/three/objects/embers";
-import { Kite } from "@/components/three/objects/kite";
 import { Volcano } from "@/components/three/objects/volcano";
 
 interface CordilleraProps {
@@ -44,21 +43,6 @@ const mobilePeaks: Peak[] = [
   { position: [-3.2, 0, -3], radius: 4.2, height: 3.6, seed: 1, delay: 0.25, color: "#2b2620" },
   { position: [1.2, 0, -0.5], radius: 3.4, height: 3.4, seed: 2, delay: 0, active: true, color: "#332c25" },
 ];
-
-interface FloatingKite {
-  position: [number, number, number];
-  radius: number;
-  seed: number;
-  delay: number;
-}
-
-// Barriletes lejanos, como los de Todos los Santos vistos desde el valle.
-const desktopKites: FloatingKite[] = [
-  { position: [-11.5, 7.2, -14], radius: 1.1, seed: 1, delay: 1.1 },
-  { position: [10.5, 8.4, -17], radius: 0.95, seed: 2, delay: 1.6 },
-];
-
-const mobileKites: FloatingKite[] = [{ position: [-3.6, 7.6, -13], radius: 0.85, seed: 1, delay: 1.1 }];
 
 function RisingPeak({
   peak,
@@ -101,44 +85,6 @@ function RisingPeak({
         eruptionRef={peak.active ? eruptionRef : undefined}
         color={peak.color}
       />
-    </group>
-  );
-}
-
-function DriftingKite({
-  kite,
-  started,
-  scrollRef,
-}: {
-  kite: FloatingKite;
-  started: boolean;
-  scrollRef: MutableRefObject<number>;
-}) {
-  const ref = useRef<Group>(null);
-  const startedAt = useRef<number | null>(null);
-
-  useFrame(({ clock }) => {
-    const group = ref.current;
-    if (!group) return;
-    if (started && startedAt.current === null) startedAt.current = clock.elapsedTime;
-    const elapsed =
-      startedAt.current === null ? 0 : Math.max(0, clock.elapsedTime - startedAt.current - kite.delay);
-    const entry = easeOutExpo(Math.min(1, elapsed / 2.6));
-    const time = clock.elapsedTime + kite.seed * 4;
-    const scroll = scrollRef.current;
-
-    group.position.set(
-      MathUtils.lerp(kite.position[0] + 18, kite.position[0], entry) + Math.sin(time * 0.3) * 0.4,
-      kite.position[1] + Math.sin(time * 0.5) * 0.3 + scroll * 3,
-      kite.position[2],
-    );
-    group.rotation.y = MathUtils.lerp(0.8, -0.15, entry);
-    group.visible = entry > 0.001;
-  });
-
-  return (
-    <group ref={ref} visible={false}>
-      <Kite radius={kite.radius} seed={kite.seed} />
     </group>
   );
 }
@@ -195,7 +141,6 @@ function Floor({ compact }: { compact: boolean }) {
 function Scene({ started, scrollRef, compact }: CordilleraProps & { compact: boolean }) {
   const eruptionRef = useRef(0);
   const peaks = compact ? mobilePeaks : desktopPeaks;
-  const kites = compact ? mobileKites : desktopKites;
 
   return (
     <>
@@ -228,16 +173,13 @@ function Scene({ started, scrollRef, compact }: CordilleraProps & { compact: boo
       {peaks.map((peak) => (
         <RisingPeak key={peak.seed} peak={peak} started={started} scrollRef={scrollRef} eruptionRef={eruptionRef} />
       ))}
-      {kites.map((kite) => (
-        <DriftingKite key={kite.seed} kite={kite} started={started} scrollRef={scrollRef} />
-      ))}
     </>
   );
 }
 
 /**
  * Escena 3D del hero: la cordillera emerge del lago al terminar el preloader y,
- * conforme la persona hace scroll, el volcán activo entra en erupción.
+ * conforme la persona hace scroll, el volcán activo (Pacaya) entra en erupción.
  */
 export function Cordillera({ started, scrollRef }: CordilleraProps) {
   const [compact, setCompact] = useState(false);

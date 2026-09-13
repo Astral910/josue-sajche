@@ -153,7 +153,7 @@ export function NavOverlay() {
           </div>
         </nav>
         <div className="flex items-end justify-between border-t border-white/10 pt-5">
-          <p className="section-label">Atelier digital · Guatemala</p>
+          <p className="section-label">Desarrollador full stack · IA</p>
           <p className="section-label">© {new Date().getFullYear()}</p>
         </div>
       </div>

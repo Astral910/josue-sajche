@@ -45,10 +45,10 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           href="/#proyectos"
           className="link-line text-white/60 hover:text-white"
         >
-          <ArrowLeft className="size-3.5" /> Todos los builds
+          <ArrowLeft className="size-3.5" /> Todos los proyectos
         </Link>
         <p className="section-label mt-12">
-          Build {project.index} · {project.kind} · {project.year}
+          Proyecto {project.index} · {project.kind} · {project.year}
         </p>
         <h1 className="display mt-5 text-[clamp(3.4rem,11vw,11rem)] font-bold uppercase leading-[0.8]">
           {project.name}
@@ -62,7 +62,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
       <article className="container-wide py-24 md:py-36">
         <section className="grid gap-10 border-t border-white/10 pt-9 md:grid-cols-12">
-          <p className="section-label md:col-span-3">El build</p>
+          <p className="section-label md:col-span-3">El proyecto</p>
           <div className="md:col-span-8">
             <p className="display text-3xl font-medium leading-tight md:text-5xl">
               {project.summary}
@@ -92,7 +92,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         </section>
 
         <section className="mt-28 grid gap-10 border-t border-white/10 pt-9 md:grid-cols-12">
-          <p className="section-label md:col-span-3">Especificaciones</p>
+          <p className="section-label md:col-span-3">Tecnologías</p>
           <div className="flex flex-wrap gap-x-8 gap-y-4 md:col-span-8">
             {project.stack.map((technology) => (
               <span key={technology} className="display text-3xl uppercase text-white/75">
@@ -122,7 +122,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
             </a>
           ) : null}
           <a href={mailto} className="link-line text-gold">
-            Iniciar un proyecto así <ArrowUpRight className="size-3.5" />
+            ¿Necesitas algo similar? Escríbeme <ArrowUpRight className="size-3.5" />
           </a>
         </section>
       </article>
@@ -134,7 +134,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       >
         <div className="container-wide flex items-end justify-between gap-6">
           <div>
-            <span className="section-label">Siguiente build · {next.index}</span>
+            <span className="section-label">Siguiente proyecto · {next.index}</span>
             <p className="display mt-4 text-[clamp(2.6rem,8vw,8rem)] font-bold uppercase leading-[0.85] transition-transform duration-700 group-hover:translate-x-3">
               {next.name}
             </p>
@@ -144,7 +144,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       </Link>
 
       <footer className="container-wide flex flex-col gap-3 py-8 text-sm text-white/45 md:flex-row md:items-center md:justify-between">
-        <span>© {new Date().getFullYear()} Josue Sajche · Atelier digital</span>
+        <span>© {new Date().getFullYear()} Josue Sajche · Desarrollador full stack e IA</span>
         <a href={`mailto:${profile.email}`} className="hover:text-gold">
           {profile.email}
         </a>

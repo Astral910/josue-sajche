@@ -45,7 +45,7 @@ function ProjectLink({ label = "Iniciar proyecto", className = "" }: { label?: s
 function Hero({ started }: { started: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
-  const eruptionCaptionRef = useRef<HTMLParagraphElement>(null);
+  const eruptionCaptionRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef(0);
 
   // El scroll del hero dispara la erupción, muestra la frase y desvanece la escena.
@@ -64,7 +64,7 @@ function Hero({ started }: { started: boolean }) {
       onUpdate: (self) => {
         const progress = self.progress;
         scrollRef.current = progress;
-        // La frase aparece en plena erupción y se retira antes del final.
+        // Los datos aparecen en plena erupción y se retiran antes del final.
         const rise = Math.min(1, Math.max(0, (progress - 0.45) / 0.2));
         const fall = Math.min(1, Math.max(0, (progress - 0.9) / 0.1));
         caption.style.opacity = String(rise * (1 - fall));
@@ -122,7 +122,7 @@ function Hero({ started }: { started: boolean }) {
         <div className="flex min-h-[100svh] flex-col justify-between pb-8 pt-24 md:pt-28">
           <div className="container-wide">
             <div className="overflow-hidden">
-              <p className="hero-line serif mx-auto max-w-2xl text-center text-xl leading-snug text-white/75 md:text-3xl">
+              <p className="hero-line mx-auto max-w-xl text-center text-base leading-snug text-white/65 md:text-lg">
                 {hero.statement}
               </p>
             </div>
@@ -137,8 +137,8 @@ function Hero({ started }: { started: boolean }) {
           </div>
           <div className="mt-6 overflow-hidden">
             <h1 className="hero-line display text-[clamp(2.5rem,6.6vw,7.8rem)] font-bold uppercase leading-[0.86] tracking-[-0.05em]">
-              Para quienes
-              <span className="block">rechazan lo ordinario</span>
+              {hero.titleLine1}
+              <span className="block">{hero.titleLine2}</span>
             </h1>
           </div>
           <div className="mt-8 flex flex-col gap-6 border-t border-white/15 pt-6 md:flex-row md:items-end md:justify-between">
@@ -151,8 +151,8 @@ function Hero({ started }: { started: boolean }) {
               <ProjectLink />
               <button
                 type="button"
-                onClick={() => scrollToTarget("#atelier")}
-                aria-label="Descubrir el portafolio"
+                onClick={() => scrollToTarget("#sobre-mi")}
+                aria-label="Ver más"
                 className="grid size-11 place-items-center border border-white/25 transition-colors hover:bg-white hover:text-black"
               >
                 <ArrowDown className="size-4" />
@@ -164,15 +164,16 @@ function Hero({ started }: { started: boolean }) {
 
         {/* Recorrido de la erupción: la escena queda fija mientras se hace scroll */}
         <div className="relative h-[130svh]">
-          <div className="sticky top-0 flex h-[100svh] items-end justify-center pb-20 md:pb-24">
-            <div className="container-wide flex items-end justify-between gap-6">
-              <p
-                ref={eruptionCaptionRef}
-                className="serif max-w-xl text-2xl leading-snug text-white/85 opacity-0 md:text-4xl"
-              >
-                {hero.eruption}
-              </p>
-              <span className="section-label hidden shrink-0 md:block">Volcán de Pacaya · En erupción</span>
+          <div className="sticky top-0 flex h-[100svh] items-end justify-center pb-16 md:pb-20">
+            <div ref={eruptionCaptionRef} className="container-wide opacity-0">
+              <dl className="grid gap-6 border-t border-white/15 pt-6 md:grid-cols-3 md:gap-8">
+                {hero.facts.map((fact) => (
+                  <div key={fact.label}>
+                    <dt className="display text-4xl font-bold leading-none md:text-6xl">{fact.value}</dt>
+                    <dd className="section-label mt-3">{fact.label}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
         </div>
@@ -182,10 +183,10 @@ function Hero({ started }: { started: boolean }) {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Atelier: imagen de craft + marquee de tecnologías                          */
+/* Sobre mí: foto + presentación + marquee de tecnologías                     */
 /* ------------------------------------------------------------------------ */
 
-function Atelier() {
+function About() {
   const imageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -209,7 +210,7 @@ function Atelier() {
   }, []);
 
   return (
-    <section id="atelier" className="relative z-10 bg-ink pt-24 md:pt-36">
+    <section id="sobre-mi" className="relative z-10 bg-ink pt-24 md:pt-36">
       {/* Fundido suave sobre la cordillera al entrar en esta sección */}
       <div
         className="pointer-events-none absolute inset-x-0 -top-48 h-48 bg-gradient-to-b from-transparent to-ink"
@@ -221,34 +222,33 @@ function Atelier() {
             <div className="absolute inset-0">
               <Image
                 src={asset("/josue-hero.png")}
-                alt="Josue Sajche en el taller"
+                alt="Josue Sajche"
                 fill
                 sizes="(max-width: 768px) 100vw, 40vw"
                 className="object-cover object-[60%_center] grayscale-[0.2]"
               />
             </div>
-            <span className="section-label absolute bottom-4 left-4">Detalle · Craft</span>
+            <span className="section-label absolute bottom-4 left-4">{profile.shortName}</span>
           </div>
         </Reveal>
 
         <div className="flex flex-col justify-between md:col-span-6 md:col-start-7">
           <Reveal>
-            <span className="section-label">Nuestro enfoque en cada build</span>
+            <span className="section-label">Sobre mí</span>
             <h2 className="display mt-6 text-[clamp(2.2rem,4.6vw,4.6rem)] font-semibold uppercase leading-[0.92]">
-              Cada decisión es intencional. Cada detalle tiene un propósito.
+              Desarrollador full stack. Diseño, código e IA en un mismo flujo.
             </h2>
           </Reveal>
           <Reveal className="mt-12">
-            <p className="max-w-lg text-lg leading-relaxed text-white/60">
-              Basado en tu contexto, tu ritmo y tus estándares. Empecé compitiendo en hackathons y
-              encontré algo más grande que ganar: una forma de construir bajo presión, escuchar
-              problemas reales y convertirlos en producto.
-            </p>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/60">
-              Hoy sigo formándome en Kinal mientras colaboro en sistemas full stack, experiencias
-              móviles y herramientas con IA pensadas desde Guatemala.
-            </p>
-            <ProjectLink className="mt-10 text-gold" />
+            {profile.about.map((paragraph, index) => (
+              <p
+                key={paragraph}
+                className={`max-w-lg text-lg leading-relaxed text-white/60 ${index > 0 ? "mt-6" : ""}`}
+              >
+                {paragraph}
+              </p>
+            ))}
+            <ProjectLink className="mt-10 text-gold" label="Hablemos de tu proyecto" />
           </Reveal>
         </div>
       </div>
@@ -272,7 +272,7 @@ function Atelier() {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Enfoque: 3 pasos con auto giratorio                                        */
+/* Cómo trabajo: 3 pasos con objeto 3D giratorio                              */
 /* ------------------------------------------------------------------------ */
 
 function Approach() {
@@ -302,8 +302,16 @@ function Approach() {
 
   return (
     <section id="enfoque" className="relative z-10 bg-ink">
+      <div className="container-wide pt-24 md:pt-32">
+        <Reveal>
+          <span className="section-label">Cómo trabajo</span>
+          <h2 className="display mt-6 max-w-3xl text-[clamp(2.2rem,4.6vw,4.6rem)] font-semibold uppercase leading-[0.92]">
+            Un proceso simple, en tres pasos.
+          </h2>
+        </Reveal>
+      </div>
       <div className="container-wide grid md:grid-cols-2">
-        {/* En móvil el auto se ancla abajo; en escritorio ocupa la columna izquierda. */}
+        {/* En móvil el objeto se ancla abajo; en escritorio ocupa la columna izquierda. */}
         <div className="sticky bottom-0 z-20 order-2 h-[40svh] md:bottom-auto md:top-0 md:order-1 md:h-screen">
           <div className="relative h-full w-full bg-gradient-to-t from-ink via-ink via-75% to-ink/0 md:bg-none">
             <SpotlightLandmark kind={current.landmark} />
@@ -329,7 +337,6 @@ function Approach() {
                 {step.title}
               </h3>
               <p className="mt-8 max-w-md text-lg leading-relaxed text-white/60">{step.text}</p>
-              <ProjectLink className="mt-10" />
             </article>
           ))}
         </div>
@@ -344,20 +351,22 @@ function Approach() {
 
 function Services() {
   return (
-    <section className="relative z-10 bg-ink py-28 md:py-40">
+    <section id="servicios" className="relative z-10 bg-ink py-28 md:py-40">
       <div className="container-wide">
         <Reveal className="grid gap-10 md:grid-cols-12">
-          <h2 className="display text-[clamp(2.2rem,4.8vw,5rem)] font-semibold leading-[0.95] md:col-span-8">
-            Un producto debe decir algo antes del primer clic. Cada línea, material y acabado se
-            considera.
-          </h2>
+          <div className="md:col-span-8">
+            <span className="section-label">Servicios</span>
+            <h2 className="display mt-6 text-[clamp(2.2rem,4.8vw,5rem)] font-semibold leading-[0.95]">
+              Qué puedo construir para tu negocio.
+            </h2>
+          </div>
           <div className="self-end md:col-span-4">
             <p className="text-base leading-relaxed text-white/60">
-              Mis servicios se forman con intención: desde la interfaz y la arquitectura hasta la
-              IA aplicada y la entrega. Cada detalle afila el carácter del producto sin
-              sobrecargarlo.
+              Desde un MVP para validar una idea hasta una app móvil o una integración con IA en un
+              sistema que ya existe. Trabajo por proyecto, con alcance y precio definidos antes de
+              empezar.
             </p>
-            <ProjectLink className="mt-8 text-gold" />
+            <ProjectLink className="mt-8 text-gold" label="Pedir una propuesta" />
           </div>
         </Reveal>
 
@@ -373,7 +382,7 @@ function Services() {
               <div>
                 <h3 className="display text-3xl font-semibold md:text-4xl">{service.title}</h3>
                 <p className="mt-4 text-base leading-relaxed opacity-70">{service.text}</p>
-                <ProjectLink className="mt-8" />
+                <ProjectLink className="mt-8" label="Cotizar" />
               </div>
             </Reveal>
           ))}
@@ -384,10 +393,10 @@ function Services() {
 }
 
 /* ------------------------------------------------------------------------ */
-/* "Lo ordinario termina aquí": proyectos destacados                          */
+/* Proyectos destacados                                                       */
 /* ------------------------------------------------------------------------ */
 
-function OrdinaryEndsHere() {
+function FeaturedProjects() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const featured = projects.slice(0, 3);
 
@@ -421,9 +430,9 @@ function OrdinaryEndsHere() {
     <section id="proyectos" className="relative z-10 overflow-hidden bg-ink py-24 md:py-36">
       <div className="container-wide">
         <Reveal>
-          <p className="display text-[clamp(3.6rem,13vw,14rem)] font-bold uppercase leading-[0.8]">
-            <span className="serif block text-[0.55em] font-normal normal-case text-white/50">Lo</span>
-            <span className="outline-text">Ordinario</span>
+          <span className="section-label">Trabajo seleccionado</span>
+          <p className="display mt-4 text-[clamp(3.6rem,13vw,14rem)] font-bold uppercase leading-[0.8]">
+            <span className="outline-text">Proyectos</span>
           </p>
         </Reveal>
 
@@ -453,11 +462,11 @@ function OrdinaryEndsHere() {
 
         <Reveal className="mt-10 grid gap-8 md:grid-cols-12 md:items-end">
           <h2 className="display text-[clamp(3.6rem,13vw,14rem)] font-bold uppercase leading-[0.8] md:col-span-8">
-            Termina aquí
+            Casos reales
           </h2>
           <p className="max-w-sm text-lg leading-relaxed text-white/60 md:col-span-4 md:pb-4">
-            Expresiones completas de criterio, intención e individualidad, moldeadas con detalle,
-            contención y presencia.
+            Una plataforma con IA que ganó una hackathon, videollamadas con traducción de señas en
+            tiempo real y un sistema bancario con microservicios. Cada uno con su caso de estudio.
           </p>
         </Reveal>
       </div>
@@ -466,7 +475,7 @@ function OrdinaryEndsHere() {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Builds anteriores + stock disponible                                       */
+/* Todos los proyectos + disponibilidad                                       */
 /* ------------------------------------------------------------------------ */
 
 function Builds() {
@@ -483,18 +492,18 @@ function Builds() {
             />
             <div className="relative">
               <h2 className="display text-4xl font-semibold uppercase leading-none md:text-6xl">
-                Builds anteriores
+                Todos los proyectos
               </h2>
               <p className="mt-5 max-w-md text-base leading-relaxed text-white/65">
-                Una colección de proyectos anteriores, moldeados por el oficio, el carácter y las
-                personas detrás de cada uno.
+                Cinco proyectos entre hackathons, trabajo en equipo y sistemas completos. Cada uno
+                con el problema, mi rol, lo que construí y el repositorio.
               </p>
               <button
                 type="button"
                 onClick={() => scrollToTarget("#lista-builds")}
                 className="link-line mt-8 text-gold"
               >
-                Explorar builds <ArrowDown className="size-3.5" />
+                Ver la lista <ArrowDown className="size-3.5" />
               </button>
             </div>
           </Reveal>
@@ -511,19 +520,13 @@ function Builds() {
             />
             <div className="relative">
               <h2 className="display text-4xl font-semibold uppercase leading-none md:text-6xl">
-                Disponible ahora
+                Disponible para proyectos
               </h2>
               <p className="mt-5 max-w-md text-base leading-relaxed text-white/65">
-                Refinado con intención, construido con propósito y listo para el siguiente reto:
-                pasantías, colaboraciones y equipos que quieran ir más lejos.
+                Tomo proyectos freelance con alcance definido: MVPs, aplicaciones web y móviles e
+                integraciones con IA. Cuéntame tu idea y te propongo alcance, tiempos y precio.
               </p>
-              <button
-                type="button"
-                onClick={() => scrollToTarget("#trayectoria")}
-                className="link-line mt-8 text-gold"
-              >
-                Ver trayectoria <ArrowDown className="size-3.5" />
-              </button>
+              <ProjectLink className="mt-8 text-gold" label="Escribirme" />
             </div>
           </Reveal>
         </div>
@@ -567,12 +570,12 @@ function Trajectory() {
           <div className="md:col-span-5">
             <span className="section-label">Trayectoria</span>
             <h2 className="display mt-6 text-[clamp(2.6rem,6vw,6rem)] font-semibold uppercase leading-[0.9]">
-              De la primera hackathon al taller.
+              De hackathons a producto real.
             </h2>
           </div>
           <p className="max-w-md self-end text-lg leading-relaxed text-white/60 md:col-span-5 md:col-start-8">
-            No es una línea recta. Es una secuencia de retos cada vez más reales: competir,
-            colaborar, operar y aprender a responder por lo construido.
+            Empecé compitiendo, seguí construyendo en equipo y hoy trabajo en producto en
+            desarrollo. Cada etapa sumó alcance y responsabilidad.
           </p>
         </Reveal>
 
@@ -614,7 +617,7 @@ function Trajectory() {
             </ul>
           </Reveal>
           <Reveal className="md:col-span-5 md:col-start-8">
-            <span className="section-label">Hacia dónde voy</span>
+            <span className="section-label">Metas</span>
             <ol className="mt-6">
               {goals.map((goal, index) => (
                 <li
@@ -642,16 +645,19 @@ function Closing() {
     <footer id="contacto" className="relative z-10 bg-ink pb-8 pt-28 md:pt-44">
       <div className="container-wide">
         <Reveal className="text-center">
-          <p className="serif text-2xl text-white/60 md:text-4xl">¿Estás listo para</p>
+          <p className="text-lg text-white/60 md:text-2xl">¿Tienes un proyecto en mente?</p>
           <h2 className="display mt-4 text-[clamp(3rem,11vw,12rem)] font-bold uppercase leading-[0.82]">
-            Rechazar
-            <span className="block">lo ordinario</span>
+            Hablemos
           </h2>
+          <p className="mx-auto mt-8 max-w-md text-base leading-relaxed text-white/60 md:text-lg">
+            Escríbeme con una descripción corta de lo que necesitas y te respondo con una
+            propuesta de alcance, tiempos y precio.
+          </p>
           <a
             href={mailto}
             className="mt-12 inline-flex h-14 items-center gap-3 border border-white/30 px-8 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors hover:bg-white hover:text-black"
           >
-            Iniciar proyecto <ArrowUpRight className="size-4" />
+            Escribir a Josue <ArrowUpRight className="size-4" />
           </a>
         </Reveal>
 
@@ -706,10 +712,10 @@ export function HomeExperience() {
       <NavOverlay />
       <main>
         <Hero started={started} />
-        <Atelier />
-        <Approach />
+        <About />
         <Services />
-        <OrdinaryEndsHere />
+        <Approach />
+        <FeaturedProjects />
         <Builds />
         <Trajectory />
       </main>

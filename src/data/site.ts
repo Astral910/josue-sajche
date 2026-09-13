@@ -1,5 +1,5 @@
-// Contenido de la portada. Sigue la narrativa de un "atelier" con objetos de
-// Guatemala generados en 3D: cada sección usa un símbolo distinto del país.
+// Contenido de la portada. Copy directo orientado a clientes freelance; los
+// objetos 3D (volcán, barrilete, Tikal, Atitlán, marimba) son la parte visual.
 
 export type LandmarkKind = "volcan" | "barrilete" | "piramide" | "lago" | "marimba";
 
@@ -21,16 +21,20 @@ export const landmarks: LandmarkSpec[] = [
 ];
 
 export const hero = {
-  eyebrow: "No modifico ideas",
-  eyebrowSecond: "Las construyo desde Guatemala",
-  title: "Para quienes rechazan lo ordinario",
+  eyebrow: "Josue Sajche · Desarrollador full stack e IA",
+  eyebrowSecond: "Guatemalteco · Disponible para proyectos freelance",
+  /** Título principal en dos líneas. */
+  titleLine1: "Construyo productos",
+  titleLine2: "web, móviles y con IA",
   subtitle:
-    "Un atelier digital de producto, inteligencia artificial y craftsmanship, con los volcanes de fondo.",
-  statement:
-    "Productos digitales construidos sobre criterio, intención e identidad. No simplemente para cumplir.",
-  /** Frase que aparece mientras el volcán entra en erupción con el scroll. */
-  eruption:
-    "Como el Pacaya: la presión acumulada, con dirección, se convierte en algo que se ve desde lejos.",
+    "Trabajo con negocios y startups que quieren lanzar algo nuevo: desde la interfaz hasta la API, la base de datos y la integración con IA.",
+  statement: "De la idea a un producto en producción, con alcance y tiempos claros desde el inicio.",
+  /** Datos que aparecen mientras el volcán entra en erupción con el scroll. */
+  facts: [
+    { value: "5", label: "proyectos con caso de estudio" },
+    { value: "1er", label: "lugar · Cursor Hackathon 2025" },
+    { value: "3", label: "frentes: web, móvil e IA" },
+  ],
 } as const;
 
 export const stack = [
@@ -54,30 +58,31 @@ export interface ApproachStep {
   index: string;
   title: string;
   text: string;
-  /** Símbolo que gira en la plataforma mientras el paso está activo. */
+  /** Objeto 3D que gira en la plataforma mientras el paso está activo (solo visual). */
   landmark: LandmarkKind;
   landmarkName: string;
 }
 
+/** Cómo trabajo un proyecto, en tres pasos. */
 export const approach: ApproachStep[] = [
   {
     index: "01",
-    title: "Identidad",
-    text: "Como un barrilete de Sumpango, cada build lleva el color de quien lo vuela: su contexto, su ritmo y el problema real que quiere resolver. Sin eso, no hay producto.",
+    title: "Entender",
+    text: "Antes de escribir código definimos juntos el problema, para quién es y qué tiene que pasar para que el proyecto valga la pena. Sales con un alcance claro, tiempos y precio.",
     landmark: "barrilete",
     landmarkName: "Barrilete de Sumpango",
   },
   {
     index: "02",
-    title: "Intención",
-    text: "Tikal se levantó piedra sobre piedra con un plan. Interfaz, datos y arquitectura se resuelven como una sola visión; cada decisión técnica existe porque la experiencia la necesita.",
+    title: "Construir",
+    text: "Interfaz, API y datos se desarrollan juntos, con entregas que puedes probar cada semana. Uso Next.js, React Native, Node.js o .NET según lo que el producto necesita, no al revés.",
     landmark: "piramide",
     landmarkName: "Templo I · Tikal",
   },
   {
     index: "03",
-    title: "Cohesión",
-    text: "Una marimba son muchas teclas y un solo sonido. Cada detalle se elige con precisión para que el conjunto tenga propósito, equilibrio y carácter. Nada decorativo, todo con función.",
+    title: "Lanzar",
+    text: "Despliegue, pruebas y ajustes con usuarios reales. Entrego el código documentado y con acceso completo, y sigo disponible para iterar cuando el producto lo pida.",
     landmark: "marimba",
     landmarkName: "Marimba",
   },
@@ -90,34 +95,35 @@ export interface Service {
 
 export const services: Service[] = [
   {
-    title: "Frontend",
-    text: "Interfaces con Next.js y React diseñadas para cambiar la presencia de un producto sin traicionar su carácter. Animación con intención, no ruido.",
+    title: "Aplicaciones web",
+    text: "Sitios y plataformas con Next.js y React: landing pages, dashboards y sistemas completos, rápidos y responsivos, listos para crecer.",
   },
   {
     title: "Backend & APIs",
-    text: "Servicios en Node.js y .NET con autenticación, validación y trazabilidad. La confianza también se diseña en la arquitectura.",
+    text: "APIs en Node.js y .NET con autenticación, validación y base de datos en PostgreSQL, MongoDB o Supabase.",
   },
   {
-    title: "Móvil",
-    text: "Clientes con Expo y React Native que acercan sistemas complejos a personas reales, en su contexto y en su bolsillo.",
+    title: "Apps móviles",
+    text: "Apps para iOS y Android con Expo y React Native conectadas a tu backend: pedidos, sesiones, ubicación y notificaciones.",
   },
   {
     title: "IA aplicada",
-    text: "LLMs, visión y agentes usados para resolver una necesidad concreta. La inteligencia sirve al producto, no al revés.",
+    text: "Asistentes con LLMs, lectura de documentos, visión por computadora y automatizaciones integradas dentro de tu producto.",
   },
   {
-    title: "Datos & Infra",
-    text: "PostgreSQL, MongoDB, Redis y Docker para entornos reproducibles que crecen sin perder claridad.",
+    title: "MVP para startups",
+    text: "De la idea a un prototipo funcional en semanas, para validar con usuarios reales o presentarlo a inversionistas.",
   },
   {
-    title: "Producto & Pitch",
-    text: "Hackathons enseñan a escuchar, priorizar y entregar bajo presión. Traduzco problemas en narrativa y en un MVP que se puede usar.",
+    title: "Infra & despliegue",
+    text: "Docker, Vercel, Supabase y Redis para entornos reproducibles y despliegues sin sorpresas.",
   },
 ];
 
 export const navigation = [
   { label: "Inicio", href: "/" },
-  { label: "Enfoque", href: "/#enfoque" },
+  { label: "Servicios", href: "/#servicios" },
+  { label: "Cómo trabajo", href: "/#enfoque" },
   { label: "Proyectos", href: "/#proyectos" },
   { label: "Trayectoria", href: "/#trayectoria" },
   { label: "Contacto", href: "/#contacto" },
