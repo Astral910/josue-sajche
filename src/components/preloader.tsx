@@ -82,7 +82,7 @@ export function Preloader({ onComplete }: PreloaderProps) {
           <span ref={counterRef} className="font-mono text-sm tabular-nums text-white/70">
             000
           </span>
-          <span className="section-label">Cargando showroom</span>
+          <span className="section-label">Levantando la cordillera</span>
         </div>
         <div className="mt-3 h-px w-full bg-white/15">
           <div ref={barRef} className="h-full origin-left scale-x-0 bg-gold" />

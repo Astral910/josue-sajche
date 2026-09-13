@@ -1,31 +1,36 @@
-// Contenido de la portada. Sigue la narrativa de un "atelier": cada sección
-// traduce el lenguaje de un taller de autos a medida al mundo del producto digital.
+// Contenido de la portada. Sigue la narrativa de un "atelier" con objetos de
+// Guatemala generados en 3D: cada sección usa un símbolo distinto del país.
 
-export interface CarSpec {
-  /** Archivo dentro de public/models (Kenney Car Kit, CC0). */
-  file: string;
-  /** Color de pintura del showroom. */
-  paint: string;
-  /** Etiqueta que aparece bajo el auto en la escena. */
+export type LandmarkKind = "volcan" | "barrilete" | "piramide" | "lago" | "marimba";
+
+export interface LandmarkSpec {
+  kind: LandmarkKind;
+  /** Nombre del símbolo que aparece como etiqueta. */
+  name: string;
+  /** Proyecto al que acompaña. */
   label: string;
 }
 
-export const fleet: CarSpec[] = [
-  { file: "race-future.glb", paint: "#e8b86d", label: "DevPrep GT" },
-  { file: "sedan-sports.glb", paint: "#2a2a31", label: "SignTrack" },
-  { file: "suv-luxury.glb", paint: "#3a3a40", label: "Sistema Bancario" },
-  { file: "hatchback-sports.glb", paint: "#8f1d1d", label: "CotiRadar" },
-  { file: "race.glb", paint: "#d9d4cb", label: "Gestor Restaurante" },
+/** Un símbolo por build, en el mismo orden que src/data/projects.ts. */
+export const landmarks: LandmarkSpec[] = [
+  { kind: "volcan", name: "Volcán de Pacaya", label: "DevPrep GT" },
+  { kind: "barrilete", name: "Barrilete de Sumpango", label: "SignTrack" },
+  { kind: "piramide", name: "Templo I · Tikal", label: "Sistema Bancario" },
+  { kind: "lago", name: "Lago de Atitlán", label: "CotiRadar" },
+  { kind: "marimba", name: "Marimba", label: "Gestor Restaurante" },
 ];
 
 export const hero = {
   eyebrow: "No modifico ideas",
-  eyebrowSecond: "Las construyo contigo",
+  eyebrowSecond: "Las construyo desde Guatemala",
   title: "Para quienes rechazan lo ordinario",
   subtitle:
-    "Un atelier digital de producto, inteligencia artificial y craftsmanship desde Guatemala.",
+    "Un atelier digital de producto, inteligencia artificial y craftsmanship, con los volcanes de fondo.",
   statement:
     "Productos digitales construidos sobre criterio, intención e identidad. No simplemente para cumplir.",
+  /** Frase que aparece mientras el volcán entra en erupción con el scroll. */
+  eruption:
+    "Como el Pacaya: la presión acumulada, con dirección, se convierte en algo que se ve desde lejos.",
 } as const;
 
 export const stack = [
@@ -49,31 +54,32 @@ export interface ApproachStep {
   index: string;
   title: string;
   text: string;
-  paint: string;
-  model: string;
+  /** Símbolo que gira en la plataforma mientras el paso está activo. */
+  landmark: LandmarkKind;
+  landmarkName: string;
 }
 
 export const approach: ApproachStep[] = [
   {
     index: "01",
     title: "Identidad",
-    text: "Cada build empieza con la persona detrás del volante: su contexto, su ritmo y el problema real que quiere resolver. Sin eso, no hay producto.",
-    paint: "#e8b86d",
-    model: "race-future.glb",
+    text: "Como un barrilete de Sumpango, cada build lleva el color de quien lo vuela: su contexto, su ritmo y el problema real que quiere resolver. Sin eso, no hay producto.",
+    landmark: "barrilete",
+    landmarkName: "Barrilete de Sumpango",
   },
   {
     index: "02",
     title: "Intención",
-    text: "Interfaz, datos y arquitectura se resuelven como una sola visión. Cada decisión técnica existe porque la experiencia la necesita.",
-    paint: "#26262b",
-    model: "sedan-sports.glb",
+    text: "Tikal se levantó piedra sobre piedra con un plan. Interfaz, datos y arquitectura se resuelven como una sola visión; cada decisión técnica existe porque la experiencia la necesita.",
+    landmark: "piramide",
+    landmarkName: "Templo I · Tikal",
   },
   {
     index: "03",
     title: "Cohesión",
-    text: "Cada detalle se elige con precisión para que el conjunto tenga propósito, equilibrio y carácter. Nada decorativo, todo con función.",
-    paint: "#8f1d1d",
-    model: "hatchback-sports.glb",
+    text: "Una marimba son muchas teclas y un solo sonido. Cada detalle se elige con precisión para que el conjunto tenga propósito, equilibrio y carácter. Nada decorativo, todo con función.",
+    landmark: "marimba",
+    landmarkName: "Marimba",
   },
 ];
 

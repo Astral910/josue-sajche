@@ -19,12 +19,12 @@ import { approach, hero, services, stack } from "@/data/site";
 import { asset } from "@/lib/asset";
 
 // Los canvas de Three.js solo existen en el navegador.
-const Showroom = dynamic(
-  () => import("@/components/three/showroom").then((module) => module.Showroom),
+const Cordillera = dynamic(
+  () => import("@/components/three/cordillera").then((module) => module.Cordillera),
   { ssr: false },
 );
-const SpotlightCar = dynamic(
-  () => import("@/components/three/spotlight-car").then((module) => module.SpotlightCar),
+const SpotlightLandmark = dynamic(
+  () => import("@/components/three/spotlight-landmark").then((module) => module.SpotlightLandmark),
   { ssr: false },
 );
 
@@ -39,33 +39,56 @@ function ProjectLink({ label = "Iniciar proyecto", className = "" }: { label?: s
 }
 
 /* ------------------------------------------------------------------------ */
-/* Hero: showroom 3D + titulares                                              */
+/* Hero: cordillera 3D + titulares + erupción con el scroll                   */
 /* ------------------------------------------------------------------------ */
 
 function Hero({ started }: { started: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
+  const eruptionCaptionRef = useRef<HTMLParagraphElement>(null);
   const scrollRef = useRef(0);
 
-  // El scroll del hero dispersa la flota y desvanece la escena.
+  // El scroll del hero dispara la erupción, muestra la frase y desvanece la escena.
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     const wrap = canvasWrapRef.current;
-    if (!section || !wrap) return;
+    const caption = eruptionCaptionRef.current;
+    if (!section || !wrap || !caption) return;
 
     const trigger = ScrollTrigger.create({
       trigger: section,
       start: "top top",
-      end: "bottom top",
+      end: "bottom bottom",
       scrub: true,
       onUpdate: (self) => {
-        scrollRef.current = self.progress;
-        wrap.style.opacity = String(1 - Math.max(0, self.progress - 0.45) / 0.55);
+        const progress = self.progress;
+        scrollRef.current = progress;
+        // La frase aparece en plena erupción y se retira antes del final.
+        const rise = Math.min(1, Math.max(0, (progress - 0.45) / 0.2));
+        const fall = Math.min(1, Math.max(0, (progress - 0.9) / 0.1));
+        caption.style.opacity = String(rise * (1 - fall));
+        caption.style.transform = `translateY(${(1 - rise) * 24}px)`;
       },
     });
 
-    return () => trigger.kill();
+    // La escena permanece hasta que la siguiente sección la cubre; después se
+    // oculta para no seguir renderizando en segundo plano.
+    const exit = ScrollTrigger.create({
+      trigger: section,
+      start: "bottom bottom",
+      end: "bottom top",
+      scrub: true,
+      onUpdate: (self) => {
+        wrap.style.opacity = String(1 - self.progress * 0.6);
+        wrap.style.visibility = self.progress >= 1 ? "hidden" : "visible";
+      },
+    });
+
+    return () => {
+      trigger.kill();
+      exit.kill();
+    };
   }, []);
 
   // Titulares que suben con la cortina del preloader.
@@ -89,25 +112,23 @@ function Hero({ started }: { started: boolean }) {
         className="fixed inset-0 z-0 h-[100svh] bg-ink"
         aria-hidden="true"
       >
-        <Showroom started={started} scrollRef={scrollRef} />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-ink via-ink/70 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[22%] bg-gradient-to-b from-ink/80 to-transparent" />
+        <Cordillera started={started} scrollRef={scrollRef} />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-ink via-ink/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[18%] bg-gradient-to-b from-ink/80 to-transparent" />
       </div>
 
-      <section
-        ref={sectionRef}
-        id="inicio"
-        className="relative z-10 flex min-h-[100svh] flex-col justify-between pb-8 pt-24 md:pt-28"
-      >
-        <div className="container-wide">
-          <div className="overflow-hidden">
-            <p className="hero-line serif mx-auto max-w-2xl text-center text-xl leading-snug text-white/75 md:text-3xl">
-              {hero.statement}
-            </p>
+      <section ref={sectionRef} id="inicio" className="relative z-10">
+        {/* Primera pantalla: titulares */}
+        <div className="flex min-h-[100svh] flex-col justify-between pb-8 pt-24 md:pt-28">
+          <div className="container-wide">
+            <div className="overflow-hidden">
+              <p className="hero-line serif mx-auto max-w-2xl text-center text-xl leading-snug text-white/75 md:text-3xl">
+                {hero.statement}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="container-wide">
+          <div className="container-wide">
           <div className="overflow-hidden">
             <h2 className="hero-line display text-sm font-semibold uppercase tracking-[0.12em] text-white/70 md:text-base">
               {hero.eyebrow}
@@ -136,6 +157,22 @@ function Hero({ started }: { started: boolean }) {
               >
                 <ArrowDown className="size-4" />
               </button>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        {/* Recorrido de la erupción: la escena queda fija mientras se hace scroll */}
+        <div className="relative h-[130svh]">
+          <div className="sticky top-0 flex h-[100svh] items-end justify-center pb-20 md:pb-24">
+            <div className="container-wide flex items-end justify-between gap-6">
+              <p
+                ref={eruptionCaptionRef}
+                className="serif max-w-xl text-2xl leading-snug text-white/85 opacity-0 md:text-4xl"
+              >
+                {hero.eruption}
+              </p>
+              <span className="section-label hidden shrink-0 md:block">Volcán de Pacaya · En erupción</span>
             </div>
           </div>
         </div>
@@ -173,6 +210,11 @@ function Atelier() {
 
   return (
     <section id="atelier" className="relative z-10 bg-ink pt-24 md:pt-36">
+      {/* Fundido suave sobre la cordillera al entrar en esta sección */}
+      <div
+        className="pointer-events-none absolute inset-x-0 -top-48 h-48 bg-gradient-to-b from-transparent to-ink"
+        aria-hidden="true"
+      />
       <div className="container-wide grid gap-12 md:grid-cols-12 md:gap-8">
         <Reveal className="md:col-span-5">
           <div ref={imageRef} className="relative aspect-[4/5] overflow-hidden bg-[#0b0b0b]">
@@ -264,12 +306,12 @@ function Approach() {
         {/* En móvil el auto se ancla abajo; en escritorio ocupa la columna izquierda. */}
         <div className="sticky bottom-0 z-20 order-2 h-[40svh] md:bottom-auto md:top-0 md:order-1 md:h-screen">
           <div className="relative h-full w-full bg-gradient-to-t from-ink via-ink via-75% to-ink/0 md:bg-none">
-            <SpotlightCar model={current.model} paint={current.paint} />
+            <SpotlightLandmark kind={current.landmark} />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between px-1 pb-6">
               <span className="font-mono text-xs text-white/50">
                 <span className="text-white">{current.index}</span> / 0{approach.length}
               </span>
-              <span className="section-label">Build · {current.title}</span>
+              <span className="section-label">{current.landmarkName}</span>
             </div>
           </div>
         </div>
