@@ -6,6 +6,7 @@ const nextConfig = {
   // El portafolio no necesita servidor: el export estático reduce superficie
   // de ataque y permite alojarlo tanto en Vercel como en GitHub Pages.
   output: "export",
+  trailingSlash: true,
   basePath: isGitHubPages ? "/josue-sajche" : "",
   assetPrefix: isGitHubPages ? "/josue-sajche/" : "",
   images: {
