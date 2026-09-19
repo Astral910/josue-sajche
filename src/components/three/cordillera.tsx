@@ -34,14 +34,14 @@ interface Peak {
 // Vista clásica desde Antigua: Agua a la izquierda, Fuego y Acatenango a la derecha.
 // El activo hace el papel del Pacaya en erupción.
 const desktopPeaks: Peak[] = [
-  { position: [-7.5, 0, -3.5], radius: 6, height: 4.4, seed: 1, delay: 0.25, color: "#2b2620" },
-  { position: [1.6, 0, -0.5], radius: 4.4, height: 3.9, seed: 2, delay: 0, active: true, color: "#332c25" },
-  { position: [7.8, 0, -5], radius: 5.4, height: 4.7, seed: 3, delay: 0.45, color: "#27221d" },
+  { position: [-7.5, 0, -3.5], radius: 6, height: 4.4, seed: 1, delay: 0.25, color: "#23201c" },
+  { position: [1.6, 0, -0.5], radius: 4.4, height: 3.9, seed: 2, delay: 0, active: true, color: "#2a2520" },
+  { position: [7.8, 0, -5], radius: 5.4, height: 4.7, seed: 3, delay: 0.45, color: "#201d19" },
 ];
 
 const mobilePeaks: Peak[] = [
-  { position: [-3.2, 0, -3], radius: 4.2, height: 3.6, seed: 1, delay: 0.25, color: "#2b2620" },
-  { position: [1.2, 0, -0.5], radius: 3.4, height: 3.4, seed: 2, delay: 0, active: true, color: "#332c25" },
+  { position: [-3.2, 0, -3], radius: 4.2, height: 3.6, seed: 1, delay: 0.25, color: "#23201c" },
+  { position: [1.2, 0, -0.5], radius: 3.4, height: 3.4, seed: 2, delay: 0, active: true, color: "#2a2520" },
 ];
 
 function RisingPeak({
@@ -150,7 +150,7 @@ function Scene({ started, scrollRef, compact }: CordilleraProps & { compact: boo
       {/* Luna fría desde la izquierda y calidez desde la derecha */}
       <directionalLight position={[-12, 14, 8]} intensity={3.6} color="#dfe6ff" castShadow />
       <directionalLight position={[14, 6, -4]} intensity={1.2} color="#e8b86d" />
-      <spotLight position={[0, 16, 14]} angle={0.8} penumbra={1} intensity={420} color="#fff1dc" />
+      <spotLight position={[0, 16, 14]} angle={0.8} penumbra={1} intensity={320} color="#fff1dc" />
       <Environment resolution={128}>
         <Lightformer form="rect" intensity={2.5} position={[0, 8, -10]} scale={[30, 3, 1]} color="#8fa3d6" />
         <Lightformer form="rect" intensity={1.5} position={[-14, 4, 0]} rotation={[0, Math.PI / 2, 0]} scale={[10, 2, 1]} color="#e8b86d" />

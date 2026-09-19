@@ -46,6 +46,7 @@ function Hero({ started }: { started: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
   const eruptionCaptionRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef(0);
 
   // El scroll del hero dispara la erupción, muestra la frase y desvanece la escena.
@@ -54,7 +55,8 @@ function Hero({ started }: { started: boolean }) {
     const section = sectionRef.current;
     const wrap = canvasWrapRef.current;
     const caption = eruptionCaptionRef.current;
-    if (!section || !wrap || !caption) return;
+    const intro = introRef.current;
+    if (!section || !wrap || !caption || !intro) return;
 
     const trigger = ScrollTrigger.create({
       trigger: section,
@@ -64,6 +66,9 @@ function Hero({ started }: { started: boolean }) {
       onUpdate: (self) => {
         const progress = self.progress;
         scrollRef.current = progress;
+        // Los titulares se desvanecen pronto para no cruzarse con los volcanes.
+        const introFade = Math.min(1, Math.max(0, progress / 0.18));
+        intro.style.opacity = String(1 - introFade);
         // Los datos aparecen en plena erupción y se retiran antes del final.
         const rise = Math.min(1, Math.max(0, (progress - 0.45) / 0.2));
         const fall = Math.min(1, Math.max(0, (progress - 0.9) / 0.1));
@@ -113,16 +118,17 @@ function Hero({ started }: { started: boolean }) {
         aria-hidden="true"
       >
         <Cordillera started={started} scrollRef={scrollRef} />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-ink via-ink/60 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[18%] bg-gradient-to-b from-ink/80 to-transparent" />
+        {/* Veladuras para que el texto siempre tenga fondo oscuro detrás */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-ink via-ink/80 via-40% to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[22%] bg-gradient-to-b from-ink/90 to-transparent" />
       </div>
 
       <section ref={sectionRef} id="inicio" className="relative z-10">
         {/* Primera pantalla: titulares */}
-        <div className="flex min-h-[100svh] flex-col justify-between pb-8 pt-24 md:pt-28">
+        <div ref={introRef} className="flex min-h-[100svh] flex-col justify-between pb-8 pt-24 md:pt-28">
           <div className="container-wide">
             <div className="overflow-hidden">
-              <p className="hero-line mx-auto max-w-xl text-center text-base leading-snug text-white/65 md:text-lg">
+              <p className="hero-line mx-auto max-w-xl text-center text-base leading-snug text-white/80 md:text-lg">
                 {hero.statement}
               </p>
             </div>
@@ -130,9 +136,9 @@ function Hero({ started }: { started: boolean }) {
 
           <div className="container-wide">
           <div className="overflow-hidden">
-            <h2 className="hero-line display text-sm font-semibold uppercase tracking-[0.12em] text-white/70 md:text-base">
+            <h2 className="hero-line display text-sm font-semibold uppercase tracking-[0.12em] text-white/85 md:text-base">
               {hero.eyebrow}
-              <span className="block text-white/40">{hero.eyebrowSecond}</span>
+              <span className="block text-white/55">{hero.eyebrowSecond}</span>
             </h2>
           </div>
           <div className="mt-6 overflow-hidden">
@@ -143,7 +149,7 @@ function Hero({ started }: { started: boolean }) {
           </div>
           <div className="mt-8 flex flex-col gap-6 border-t border-white/15 pt-6 md:flex-row md:items-end md:justify-between">
             <div className="overflow-hidden">
-              <p className="hero-line max-w-xl text-base leading-relaxed text-white/70 md:text-lg">
+              <p className="hero-line max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
                 {hero.subtitle}
               </p>
             </div>
@@ -166,11 +172,11 @@ function Hero({ started }: { started: boolean }) {
         <div className="relative h-[130svh]">
           <div className="sticky top-0 flex h-[100svh] items-end justify-center pb-16 md:pb-20">
             <div ref={eruptionCaptionRef} className="container-wide opacity-0">
-              <dl className="grid gap-6 border-t border-white/15 pt-6 md:grid-cols-3 md:gap-8">
+              <dl className="grid gap-6 border-t border-white/20 pt-6 md:grid-cols-3 md:gap-8">
                 {hero.facts.map((fact) => (
                   <div key={fact.label}>
                     <dt className="display text-4xl font-bold leading-none md:text-6xl">{fact.value}</dt>
-                    <dd className="section-label mt-3">{fact.label}</dd>
+                    <dd className="section-label mt-3 !text-white/80">{fact.label}</dd>
                   </div>
                 ))}
               </dl>
@@ -312,8 +318,14 @@ function Approach() {
       </div>
       <div className="container-wide grid md:grid-cols-2">
         {/* En móvil el objeto se ancla abajo; en escritorio ocupa la columna izquierda. */}
-        <div className="sticky bottom-0 z-20 order-2 h-[40svh] md:bottom-auto md:top-0 md:order-1 md:h-screen">
-          <div className="relative h-full w-full bg-gradient-to-t from-ink via-ink via-75% to-ink/0 md:bg-none">
+        <div className="sticky bottom-0 z-20 order-2 h-[36svh] md:bottom-auto md:top-0 md:order-1 md:h-screen">
+          {/* En móvil el fondo es sólido (con un borde difuminado corto) para que el
+              texto no se lea a medias detrás del objeto. */}
+          <div className="relative h-full w-full bg-ink md:bg-transparent">
+            <div
+              className="pointer-events-none absolute inset-x-0 -top-12 h-12 bg-gradient-to-t from-ink to-transparent md:hidden"
+              aria-hidden="true"
+            />
             <SpotlightLandmark kind={current.landmark} />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between px-1 pb-6">
               <span className="font-mono text-xs text-white/50">
@@ -328,7 +340,7 @@ function Approach() {
           {approach.map((step) => (
             <article
               key={step.index}
-              className="approach-step flex min-h-[60svh] flex-col justify-start border-t border-white/10 pb-24 pt-14 md:min-h-screen md:justify-center md:border-t-0 md:py-16 md:pl-12"
+              className="approach-step flex min-h-[64svh] flex-col justify-start border-t border-white/10 pb-[40svh] pt-12 md:min-h-screen md:justify-center md:border-t-0 md:py-16 md:pb-16 md:pl-12"
             >
               <span className="font-mono text-xs text-white/40">
                 {step.index} / 0{approach.length}
